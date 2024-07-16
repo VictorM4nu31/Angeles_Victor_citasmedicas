@@ -1,31 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:citas_medicas/models/user.dart';
 import 'package:citas_medicas/models/appointment.dart';
 import 'package:citas_medicas/services/database_service.dart';
 
-class EditAppointmentScreen extends StatefulWidget {
-  final Appointment appointment;
+class AppointmentScreen extends StatefulWidget {
+  final User user;
 
-  const EditAppointmentScreen({super.key, required this.appointment});
+  const AppointmentScreen({required this.user});
 
   @override
-  EditAppointmentScreenState createState() => EditAppointmentScreenState();
+  _AppointmentScreenState createState() => _AppointmentScreenState();
 }
 
-class EditAppointmentScreenState extends State<EditAppointmentScreen> {
+class _AppointmentScreenState extends State<AppointmentScreen> {
   final DatabaseService _databaseService = DatabaseService();
-  late TextEditingController _doctorController;
-  late TextEditingController _dateController;
-  late TextEditingController _addressController;
+  final TextEditingController _doctorController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
   DateTime? _selectedDate;
-
-  @override
-  void initState() {
-    super.initState();
-    _doctorController = TextEditingController(text: widget.appointment.doctor);
-    _dateController = TextEditingController(text: widget.appointment.date);
-    _addressController = TextEditingController(text: widget.appointment.address);
-  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -44,23 +37,20 @@ class EditAppointmentScreenState extends State<EditAppointmentScreen> {
 
   void _saveAppointment() async {
     var appointment = Appointment(
-      id: widget.appointment.id,
-      userId: widget.appointment.userId,
+      userId: widget.user.id!,
       doctor: _doctorController.text,
       date: _dateController.text,
       address: _addressController.text,
     );
-    await _databaseService.updateAppointment(appointment);
-    if (mounted) {
-      Navigator.pop(context);
-    }
+    await _databaseService.insertAppointment(appointment);
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Editar cita'),
+        title: const Text('Agendar cita médica'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -93,7 +83,7 @@ class EditAppointmentScreenState extends State<EditAppointmentScreen> {
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: _saveAppointment,
-                      child: const Text('Guardar'),
+                      child: const Text('Agendar'),
                     ),
                   ],
                 ),
